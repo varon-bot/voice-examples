@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits, VoiceChannel } from "discord.js";
 import { joinVoiceChannel, createAudioPlayer, createAudioResource } from "@discordjs/voice";
 import play from "play-dl";
 
@@ -13,9 +13,10 @@ const CHANNEL_ID = "ここにボイスチャンネルID";
 const STREAM_URL = "https://www.youtube.com/watch?v=jfKfPfyJRdk";
 
 client.once("ready", async () => {
+
   console.log("Bot Ready");
 
-  const channel = await client.channels.fetch(CHANNEL_ID);
+  const channel = await client.channels.fetch(CHANNEL_ID) as VoiceChannel;
 
   const connection = joinVoiceChannel({
     channelId: channel.id,
@@ -24,12 +25,16 @@ client.once("ready", async () => {
   });
 
   const stream = await play.stream(STREAM_URL);
-  const resource = createAudioResource(stream.stream, { inputType: stream.type });
+
+  const resource = createAudioResource(stream.stream, {
+    inputType: stream.type
+  });
 
   const player = createAudioPlayer();
   player.play(resource);
 
   connection.subscribe(player);
+
 });
 
 client.login(process.env.DISCORD_TOKEN);
