@@ -1,58 +1,35 @@
-import process from 'node:process';
-import { createAudioPlayer, AudioPlayerStatus, NoSubscriberBehavior } from '@discordjs/voice';
-import { Client, Events, GatewayIntentBits } from 'discord.js';
-import { config } from './config.js';
-import { attachRecorder, connectToChannel } from './util/helpers.js';
-
-const { maxTransmissionGap } = config;
-
-const player = createAudioPlayer({
-	behaviors: {
-		noSubscriber: NoSubscriberBehavior.Play,
-		maxMissedFrames: Math.round(maxTransmissionGap / 20),
-	},
-});
-
-player.on('stateChange', (oldState, newState) => {
-	if (oldState.status === AudioPlayerStatus.Idle && newState.status === AudioPlayerStatus.Playing) {
-		console.log('Playing audio output on audio player');
-	} else if (newState.status === AudioPlayerStatus.Idle) {
-		console.log('Playback has stopped. Attempting to restart.');
-
-		attachRecorder(player);
-	}
-});
+import { Client, GatewayIntentBits } from "discord.js";
+import { joinVoiceChannel, createAudioPlayer, createAudioResource } from "@discordjs/voice";
+import play from "play-dl";
 
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildVoiceStates
+  ]
 });
 
-client.once(Events.ClientReady, () => {
-	console.log('Ready!');
+const CHANNEL_ID = "ここにボイスチャンネルID";
+const STREAM_URL = "https://www.youtube.com/watch?v=jfKfPfyJRdk";
 
-	attachRecorder(player);
+client.once("ready", async () => {
+  console.log("Bot Ready");
+
+  const channel = await client.channels.fetch(CHANNEL_ID);
+
+  const connection = joinVoiceChannel({
+    channelId: channel.id,
+    guildId: channel.guild.id,
+    adapterCreator: channel.guild.voiceAdapterCreator
+  });
+
+  const stream = await play.stream(STREAM_URL);
+  const resource = createAudioResource(stream.stream, { inputType: stream.type });
+
+  const player = createAudioPlayer();
+  player.play(resource);
+
+  connection.subscribe(player);
 });
 
-client.on(Events.MessageCreate, async (message) => {
-	if (message.author.bot || !message.inGuild() || !message.mentions.has(message.client.user.id)) return;
-
-	if (message.content.includes('join')) {
-		if (!message.member?.voice.channel) {
-			await message.reply('Join a voice channel then try again!');
-
-			return;
-		}
-
-		try {
-			const connection = await connectToChannel(message.member.voice.channel);
-
-			connection.subscribe(player);
-
-			await message.reply('Playing now!');
-		} catch (error) {
-			console.error(error);
-		}
-	}
-});
-
-await client.login(process.env.TOKEN);
+client.login(process.env.DISCORD_TOKEN);
