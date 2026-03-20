@@ -1,9 +1,10 @@
+import fs from "fs";
 import { Client, GatewayIntentBits, ChannelType } from "discord.js";
-import { 
-  joinVoiceChannel, 
-  createAudioPlayer, 
-  createAudioResource, 
-  AudioPlayerStatus 
+import {
+  joinVoiceChannel,
+  createAudioPlayer,
+  createAudioResource,
+  AudioPlayerStatus
 } from "@discordjs/voice";
 import play from "play-dl";
 
@@ -14,14 +15,20 @@ const client = new Client({
   ]
 });
 
-// ★ 自分のボイスチャンネルID
 const CHANNEL_ID = "1480661292879581194";
 
-// ★ YouTube（軽いURLにする）
+// YouTube（軽いURL）
 const STREAM_URL = "https://youtu.be/5qap5aO4i9A";
 
 client.once("ready", async () => {
   console.log("Bot Ready");
+
+  // ★ Cookie読み込み（ここが重要）
+  await play.setToken({
+    youtube: {
+      cookie: fs.readFileSync("./cookies.txt", "utf-8"),
+    },
+  });
 
   try {
     const channel = await client.channels.fetch(CHANNEL_ID);
@@ -62,7 +69,7 @@ client.once("ready", async () => {
     // 最初の再生
     await playStream();
 
-    // ループ（止まったら再開）
+    // ループ
     player.on(AudioPlayerStatus.Idle, async () => {
       console.log("ループ再生");
       await playStream();
