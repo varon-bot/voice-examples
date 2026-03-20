@@ -9,7 +9,7 @@ const client = new Client({
   ]
 });
 
-const CHANNEL_ID = "1476966964088934400";
+const CHANNEL_ID = "1480661292879581194";
 const STREAM_URL = "https://www.youtube.com/watch?v=jfKfPfyJRdk";
 
 client.once("ready", async () => {
