@@ -9,7 +9,7 @@
 		"build:check": "tsc --noEmit --incremental false",
 		"lint": "prettier --cache --check . && eslint src --ext mjs,js,ts --cache",
 		"format": "prettier --cache --write . && eslint src --ext mjs,js,ts --fix --cache",
-		"start": "pnpm run build && node --env-file=.env dist/index.js"
+		"start": "npm run build && node dist/index.js"
 	},
 	"keywords": [
 		"discord",
