@@ -17,7 +17,7 @@ const client = new Client({
 
 const CHANNEL_ID = "1480661292879581194";
 
-// YouTube（軽いURL）
+// YouTube（軽いURL）　
 const STREAM_URL = "https://youtu.be/5qap5aO4i9A";
 
 client.once("ready", async () => {
