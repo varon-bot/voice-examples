@@ -1,5 +1,13 @@
 import { Client, GatewayIntentBits, ChannelType } from "discord.js";
 import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } from "@discordjs/voice";
+import play from "play-dl";
+
+// ★ Cookie設定（ここ超重要）
+await play.setToken({
+  youtube: {
+    cookie: process.env.YOUTUBE_COOKIE,
+  },
+});
 
 const client = new Client({
   intents: [
@@ -9,9 +17,7 @@ const client = new Client({
 });
 
 const CHANNEL_ID = "1480661292879581194";
-
-// ★ YouTubeやめてMP3直
-const STREAM_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+const STREAM_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 
 client.once("ready", async () => {
   console.log("Bot Ready");
@@ -34,10 +40,18 @@ client.once("ready", async () => {
 
   console.log("再生開始");
 
-  // ★ ここが超重要（stream使わない）
-  const resource = createAudioResource(STREAM_URL);
+  try {
+    const stream = await play.stream(STREAM_URL);
 
-  player.play(resource);
+    const resource = createAudioResource(stream.stream, {
+      inputType: stream.type,
+    });
+
+    player.play(resource);
+
+  } catch (e) {
+    console.error("再生エラー:", e);
+  }
 
   player.on(AudioPlayerStatus.Playing, () => {
     console.log("再生中！");
