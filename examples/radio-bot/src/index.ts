@@ -9,7 +9,7 @@ const client = new Client({
   ]
 });
 
-const CHANNEL_ID = "ここにボイスチャンネルID";
+const CHANNEL_ID = "1476966964088934400";
 const STREAM_URL = "https://www.youtube.com/watch?v=jfKfPfyJRdk";
 
 client.once("ready", async () => {
