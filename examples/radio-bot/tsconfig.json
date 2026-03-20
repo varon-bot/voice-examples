@@ -2,7 +2,7 @@
 	"$schema": "https://json.schemastore.org/tsconfig.json",
 	// Mapped from https://www.typescriptlang.org/tsconfig
 	"compilerOptions": {
-		// Type Checking 
+		// Type Checking  
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"exactOptionalPropertyTypes": true,
