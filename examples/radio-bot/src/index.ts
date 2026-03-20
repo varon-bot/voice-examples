@@ -41,9 +41,12 @@ client.once("ready", async () => {
 
         const stream = await play.stream(STREAM_URL);
 
-        const resource = createAudioResource(stream.stream, {
-          inputType: stream.type
-        });
+const resource = createAudioResource(stream.stream, {
+  inputType: stream.type,
+  inlineVolume: true,
+});
+
+resource.volume?.setVolume(0.5);
 
         player.play(resource);
 
