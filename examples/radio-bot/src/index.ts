@@ -1,4 +1,3 @@
-import fs from "fs";
 import { Client, GatewayIntentBits, ChannelType } from "discord.js";
 import {
   joinVoiceChannel,
@@ -16,28 +15,10 @@ const client = new Client({
 });
 
 const CHANNEL_ID = "1480661292879581194";
-const STREAM_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+const STREAM_URL = "https://www.youtube.com/watch?v=5qap5aO4i9A";
 
 client.once("ready", async () => {
   console.log("Bot Ready");
-
-  // ★ cookies.txt 読み込み＆変換
-  const raw = fs.readFileSync("./cookies.txt", "utf-8");
-
-  const cookie = raw
-    .split("\n")
-    .filter(line => line && !line.startsWith("#"))
-    .map(line => {
-      const parts = line.split("\t");
-      return `${parts[5]}=${parts[6]}`;
-    })
-    .join("; ");
-
-  await play.setToken({
-    youtube: {
-      cookie: cookie,
-    },
-  });
 
   try {
     const channel = await client.channels.fetch(CHANNEL_ID);
@@ -82,21 +63,9 @@ client.once("ready", async () => {
       await playStream();
     });
 
-    player.on(AudioPlayerStatus.Playing, () => {
-      console.log("再生中！");
-    });
-
-    player.on("error", (e) => {
-      console.error("プレイヤーエラー:", e);
-    });
-
   } catch (err) {
     console.error("初期化エラー:", err);
   }
 });
-
-// 落ち防止
-client.on("error", console.error);
-process.on("uncaughtException", console.error);
 
 client.login(process.env.DISCORD_TOKEN);
