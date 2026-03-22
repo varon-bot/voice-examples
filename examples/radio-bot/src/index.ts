@@ -37,7 +37,10 @@ client.once("ready", async () => {
 
     const player = createAudioPlayer();
     connection.subscribe(player);
-
+player.on(AudioPlayerStatus.Playing, () => {
+  console.log("再生中！");
+});
+    
     console.log("接続成功・再生準備OK");
 
   } catch (err) {
