@@ -40,9 +40,6 @@ client.once("ready", async () => {
 
     console.log("接続成功・再生準備OK");
 
-    // 最初の再生
-    await playStream();
-
     // ループ再生
     player.on(AudioPlayerStatus.Idle, async () => {
       console.log("ループ再生");
