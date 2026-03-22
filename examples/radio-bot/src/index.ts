@@ -40,12 +40,6 @@ client.once("ready", async () => {
 
     console.log("接続成功・再生準備OK");
 
-    // ループ再生
-    player.on(AudioPlayerStatus.Idle, async () => {
-      console.log("ループ再生");
-      await playStream();
-    });
-
   } catch (err) {
     console.error("初期化エラー:", err);
   }
