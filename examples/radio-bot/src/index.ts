@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, ChannelType } from "discord.js";
 import {
-  joinVoiceChannel, 
+  joinVoiceChannel,
   createAudioPlayer,
   createAudioResource,
   AudioPlayerStatus
@@ -14,7 +14,10 @@ const client = new Client({
   ]
 });
 
-const CHANNEL_ID = "1480661292879581194";
+// ★ 自分のボイスチャンネルIDにする
+const CHANNEL_ID = "ここを自分のIDに変更";
+
+// ★ 安定するYouTubeライブ
 const STREAM_URL = "https://www.youtube.com/watch?v=jfKfPfyJRdk";
 
 client.once("ready", async () => {
@@ -45,19 +48,24 @@ client.once("ready", async () => {
 
         const stream = await play.stream(STREAM_URL);
 
-        const resource = createAudioResource(stream.stream, {
-          inputType: stream.type,
-        });
+        const resource = createAudioResource(stream.stream);
 
         player.play(resource);
+
+        // ★ これ追加（重要）
+        player.on(AudioPlayerStatus.Playing, () => {
+          console.log("再生中！");
+        });
 
       } catch (err) {
         console.error("再生エラー:", err);
       }
     };
 
+    // 最初の再生
     await playStream();
 
+    // ループ再生
     player.on(AudioPlayerStatus.Idle, async () => {
       console.log("ループ再生");
       await playStream();
