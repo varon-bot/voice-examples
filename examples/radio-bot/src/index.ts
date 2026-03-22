@@ -1,11 +1,5 @@
-import { Client, GatewayIntentBits, ChannelType } from "discord.js";
-import {
-  joinVoiceChannel,
-  createAudioPlayer,
-  createAudioResource,
-  AudioPlayerStatus
-} from "@discordjs/voice";
-import play from "play-dl";
+import { Client, GatewayIntentBits } from "discord.js";
+import { Manager } from "erela.js";
 
 const client = new Client({
   intents: [
@@ -14,76 +8,60 @@ const client = new Client({
   ]
 });
 
-// ★ あなたのVC ID
+// Lavalink接続設定
+const manager = new Manager({
+  nodes: [
+    {
+      host: "lavalink.railway.internal",
+      port: 2333,
+      password: "youshallnotpass"
+    }
+  ],
+  send: (id, payload) => {
+    const guild = client.guilds.cache.get(id);
+    if (guild) guild.shard.send(payload);
+  }
+});
+
+// ★ 自分のボイスチャンネルID
 const CHANNEL_ID = "1480661292879581194";
 
-// ★ 安定する配信
-const STREAM_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-
-client.once("ready", async () => {
+client.once("ready", () => {
   console.log("Bot Ready");
+  manager.init(client.user.id);
+});
 
-  // ★ これ追加（超重要）
-  await play.setToken({
-    youtube: {
-      cookie: "",
-    },
+client.on("raw", (d) => manager.updateVoiceState(d));
+
+client.on("ready", async () => {
+  const guild = client.guilds.cache.first();
+  if (!guild) return;
+
+  const player = manager.create({
+    guild: guild.id,
+    voiceChannel: CHANNEL_ID,
+    textChannel: guild.systemChannelId,
+    selfDeafen: true
   });
 
-  try {
-    const channel = await client.channels.fetch(CHANNEL_ID);
+  player.connect();
 
-    if (!channel || channel.type !== ChannelType.GuildVoice) {
-      console.log("チャンネル取得失敗");
-      return;
-    }
+  console.log("接続成功");
 
-    const connection = joinVoiceChannel({
-      channelId: channel.id,
-      guildId: channel.guild.id,
-      adapterCreator: channel.guild.voiceAdapterCreator
-    });
+  // YouTube再生（Lavalink経由）
+  const res = await manager.search(
+    "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+  );
 
-    const player = createAudioPlayer();
-    connection.subscribe(player);
-
-    console.log("接続成功・再生準備OK");
-
-    const playStream = async () => {
-      try {
-        console.log("再生開始");
-
-        // ★ ここ変更（重要）
-        const stream = await play.stream(STREAM_URL, {
-          discordPlayerCompatibility: true
-        });
-
-        const resource = createAudioResource(stream.stream);
-
-        player.play(resource);
-
-      } catch (err) {
-        console.error("再生エラー:", err);
-      }
-    };
-
-    // ★ 再生状態ログ（ここに置くのが正しい）
-    player.on(AudioPlayerStatus.Playing, () => {
-      console.log("再生中！");
-    });
-
-    // 最初の再生
-    await playStream();
-
-    // ループ
-    player.on(AudioPlayerStatus.Idle, async () => {
-      console.log("ループ再生");
-      await playStream();
-    });
-
-  } catch (err) {
-    console.error("初期化エラー:", err);
+  if (res.tracks.length === 0) {
+    console.log("曲が見つからない");
+    return;
   }
+
+  player.queue.add(res.tracks[0]);
+  player.play();
+
+  console.log("再生開始");
 });
 
 client.login(process.env.DISCORD_TOKEN);
