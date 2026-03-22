@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, ChannelType } from "discord.js";
 import {
-  joinVoiceChannel,
+  joinVoiceChannel, 
   createAudioPlayer,
   createAudioResource,
   AudioPlayerStatus
