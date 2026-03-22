@@ -1,5 +1,11 @@
-import { Client, GatewayIntentBits } from "discord.js";
-import { Manager } from "erela.js";
+import { Client, GatewayIntentBits, ChannelType } from "discord.js";
+import {
+  joinVoiceChannel,
+  createAudioPlayer,
+  createAudioResource,
+  AudioPlayerStatus
+} from "@discordjs/voice";
+import play from "play-dl";
 
 const client = new Client({
   intents: [
@@ -8,60 +14,67 @@ const client = new Client({
   ]
 });
 
-// Lavalink接続設定
-const manager = new Manager({
-  nodes: [
-    {
-      host: "lavalink.railway.internal",
-      port: 2333,
-      password: "youshallnotpass"
-    }
-  ],
-  send: (id, payload) => {
-    const guild = client.guilds.cache.get(id);
-    if (guild) guild.shard.send(payload);
-  }
-});
-
 // ★ 自分のボイスチャンネルID
 const CHANNEL_ID = "1480661292879581194";
 
-client.once("ready", () => {
+// ★ 安定するYouTubeライブ（lofi）
+const STREAM_URL = "https://www.youtube.com/watch?v=jfKfPfyJRdk";
+
+client.once("ready", async () => {
   console.log("Bot Ready");
-  manager.init(client.user.id);
-});
 
-client.on("raw", (d) => manager.updateVoiceState(d));
+  try {
+    const channel = await client.channels.fetch(CHANNEL_ID);
 
-client.on("ready", async () => {
-  const guild = client.guilds.cache.first();
-  if (!guild) return;
+    if (!channel || channel.type !== ChannelType.GuildVoice) {
+      console.log("チャンネル取得失敗");
+      return;
+    }
 
-  const player = manager.create({
-    guild: guild.id,
-    voiceChannel: CHANNEL_ID,
-    textChannel: guild.systemChannelId,
-    selfDeafen: true
-  });
+    const connection = joinVoiceChannel({
+      channelId: channel.id,
+      guildId: channel.guild.id,
+      adapterCreator: channel.guild.voiceAdapterCreator
+    });
 
-  player.connect();
+    const player = createAudioPlayer();
+    connection.subscribe(player);
 
-  console.log("接続成功");
+    console.log("接続成功・再生準備OK");
 
-  // YouTube再生（Lavalink経由）
-  const res = await manager.search(
-    "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-  );
+    const playStream = async () => {
+      try {
+        console.log("再生開始");
 
-  if (res.tracks.length === 0) {
-    console.log("曲が見つからない");
-    return;
+        // ★ YouTubeから音声取得
+        const stream = await play.stream(STREAM_URL);
+
+        const resource = createAudioResource(stream.stream);
+
+        player.play(resource);
+
+        // ★ 再生開始検知
+        player.once(AudioPlayerStatus.Playing, () => {
+          console.log("再生中！");
+        });
+
+      } catch (err) {
+        console.error("再生エラー:", err);
+      }
+    };
+
+    // 最初の再生
+    await playStream();
+
+    // ループ再生
+    player.on(AudioPlayerStatus.Idle, async () => {
+      console.log("ループ再生");
+      await playStream();
+    });
+
+  } catch (err) {
+    console.error("初期化エラー:", err);
   }
-
-  player.queue.add(res.tracks[0]);
-  player.play();
-
-  console.log("再生開始");
 });
 
 client.login(process.env.DISCORD_TOKEN);
