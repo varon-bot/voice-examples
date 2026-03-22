@@ -40,27 +40,6 @@ client.once("ready", async () => {
 
     console.log("接続成功・再生準備OK");
 
-    const playStream = async () => {
-      try {
-        console.log("再生開始");
-
-        // ★ YouTubeから音声取得
-        const stream = await play.stream(STREAM_URL);
-
-        const resource = createAudioResource(stream.stream);
-
-        player.play(resource);
-
-        // ★ 再生開始検知
-        player.once(AudioPlayerStatus.Playing, () => {
-          console.log("再生中！");
-        });
-
-      } catch (err) {
-        console.error("再生エラー:", err);
-      }
-    };
-
     // 最初の再生
     await playStream();
 
