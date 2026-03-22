@@ -5,7 +5,6 @@ import {
   createAudioResource,
   AudioPlayerStatus
 } from "@discordjs/voice";
-import play from "play-dl";
 
 const client = new Client({
   intents: [
