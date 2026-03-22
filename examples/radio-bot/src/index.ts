@@ -18,7 +18,7 @@ const client = new Client({
 const CHANNEL_ID = "1480661292879581194";
 
 // ★ 安定する配信
-const STREAM_URL = "https://www.youtube.com/watch?v=5qap5aO4i9A";
+const STREAM_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 
 client.once("ready", async () => {
   console.log("Bot Ready");
