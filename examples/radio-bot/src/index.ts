@@ -15,7 +15,7 @@ const client = new Client({
 });
 
 // ★ 自分のボイスチャンネルIDにする
-const CHANNEL_ID = "ここを自分のIDに変更";
+const CHANNEL_ID = "1480661292879581194";
 
 // ★ 安定するYouTubeライブ
 const STREAM_URL = "https://www.youtube.com/watch?v=jfKfPfyJRdk";
