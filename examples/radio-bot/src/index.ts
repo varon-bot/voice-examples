@@ -17,7 +17,6 @@ const client = new Client({
 const CHANNEL_ID = "1480661292879581194";
 
 // ★ 安定するYouTubeライブ（lofi）
-const STREAM_URL = "https://www.youtube.com/watch?v=jfKfPfyJRdk";
 
 client.once("ready", async () => {
   console.log("Bot Ready");
