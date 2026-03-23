@@ -8,7 +8,6 @@ const client = new Client({
   ]
 });
 
-// Lavalink設定
 const manager = new Manager({
   nodes: [
     {
@@ -23,25 +22,44 @@ const manager = new Manager({
   }
 });
 
-// VC ID
 const CHANNEL_ID = "1480661292879581194";
+
+// ★ ここが重要
+let lavalinkReady = false;
+
+manager.on("nodeConnect", () => {
+  console.log("Lavalink接続成功");
+  lavalinkReady = true;
+});
+
+manager.on("nodeError", (node, error) => {
+  console.error("Lavalinkエラー:", error);
+});
 
 client.once("ready", async () => {
   console.log("Bot Ready");
 
-  // ★ null対策（重要）
   manager.init(client.user!.id);
 
-  const guild = client.guilds.cache.first();
-  if (!guild) {
-    console.log("Guild取得失敗");
+  // ★ 接続待ち（最大10秒）
+  let wait = 0;
+  while (!lavalinkReady && wait < 20) {
+    await new Promise(r => setTimeout(r, 500));
+    wait++;
+  }
+
+  if (!lavalinkReady) {
+    console.log("Lavalink接続失敗");
     return;
   }
+
+  const guild = client.guilds.cache.first();
+  if (!guild) return;
 
   const player = manager.create({
     guild: guild.id,
     voiceChannel: CHANNEL_ID,
-    textChannel: CHANNEL_ID, // ★確実にstringにする
+    textChannel: CHANNEL_ID,
     selfDeafen: true
   });
 
@@ -52,7 +70,7 @@ client.once("ready", async () => {
     "https://www.youtube.com/watch?v=jfKfPfyJRdk"
   );
 
-  if (!res.tracks || res.tracks.length === 0) {
+  if (!res.tracks.length) {
     console.log("曲取得失敗");
     return;
   }
@@ -63,7 +81,6 @@ client.once("ready", async () => {
   console.log("再生開始");
 });
 
-// Lavalink連携（必須）
 client.on("raw", (d) => manager.updateVoiceState(d));
 
 client.login(process.env.DISCORD_TOKEN);
