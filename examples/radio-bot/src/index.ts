@@ -11,7 +11,7 @@ const client = new Client({
 const manager = new Manager({
   nodes: [
     {
-      host: "lavalink-production-ba77.up.railway.app",
+      host: "lavalink", // ← ここが最重要（Railway internal）
       port: 2333,
       password: "youshallnotpass",
       secure: false
@@ -23,12 +23,22 @@ const manager = new Manager({
   }
 });
 
+// Lavalink接続イベント（確認用）
+manager.on("nodeConnect", node => {
+  console.log("Lavalink接続成功");
+});
+
+manager.on("nodeError", (node, error) => {
+  console.error("Lavalink接続エラー", error);
+});
+
+// VC ID
 const CHANNEL_ID = "1480661292879581194";
 
 client.once("ready", async () => {
   console.log("Bot Ready");
 
-  manager.init(client.user.id);
+  manager.init(client.user!.id);
 
   const guild = client.guilds.cache.first();
   if (!guild) {
