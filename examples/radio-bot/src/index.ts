@@ -11,9 +11,8 @@ const client = new Client({
 const manager = new Manager({
   nodes: [
     {
-      // 🔴 ここを書き換える（TCP Proxyの値）
-      host: "viaduct.proxy.rlwy.net",
-      port: 12345,
+      host: "ここにTCPのhost",
+      port: ここにport,
       password: "youshallnotpass",
       secure: true
     }
@@ -24,29 +23,12 @@ const manager = new Manager({
   }
 });
 
-// ✅ Lavalinkログ
-manager.on("nodeConnect", () => {
-  console.log("✅ Lavalink接続成功");
-});
-
-manager.on("nodeError", (_, err) => {
-  console.log("❌ Lavalink接続失敗", err);
-});
-
-// 🔴 VCのチャンネルID（そのままでOK）
-const CHANNEL_ID = "1480661292879581194";
-
-client.once("ready", async () => {
-  console.log("🤖 Bot Ready");
-
-  // Lavalink初期化
-  manager.init(client.user!.id);
-
+// 👇 ここで再生処理をやる
+async function startPlayer() {
   const guild = client.guilds.cache.first();
-  if (!guild) {
-    console.log("❌ Guild取得失敗");
-    return;
-  }
+  if (!guild) return;
+
+  const CHANNEL_ID = "1480661292879581194";
 
   const player = manager.create({
     guild: guild.id,
@@ -55,28 +37,36 @@ client.once("ready", async () => {
     selfDeafen: true
   });
 
-  // 🔥 接続
   player.connect();
-  console.log("🔊 VC接続処理開始");
+  console.log("VC接続開始");
 
-  // 🔥 曲検索
   const res = await manager.search(
     "https://www.youtube.com/watch?v=jfKfPfyJRdk"
   );
 
-  if (!res.tracks.length) {
-    console.log("❌ 曲取得失敗");
-    return;
-  }
+  if (!res.tracks.length) return;
 
   player.queue.add(res.tracks[0]);
   player.play();
 
-  console.log("🎵 再生開始");
+  console.log("再生開始");
+}
+
+// ✅ Lavalink接続成功時だけ実行
+manager.on("nodeConnect", () => {
+  console.log("✅ Lavalink接続成功");
+  startPlayer(); // ←ここが重要
 });
 
-// Discord Voice用（必須）
+manager.on("nodeError", (_, err) => {
+  console.log("❌ Lavalink接続失敗", err);
+});
+
+client.once("ready", () => {
+  console.log("🤖 Bot Ready");
+  manager.init(client.user!.id);
+});
+
 client.on("raw", (d) => manager.updateVoiceState(d));
 
-// 起動
 client.login(process.env.DISCORD_TOKEN);
