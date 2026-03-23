@@ -11,10 +11,10 @@ const client = new Client({
 const manager = new Manager({
   nodes: [
     {
-      host: "lavalink", // ← ★ここだけ修正
-      port: 2333,
+      host: "lavalink-production-ba77.up.railway.app", // ← ★ここ変更（あなたのURLにする）
+      port: 443, // ← ★これ
       password: "youshallnotpass",
-      secure: false
+      secure: true // ← ★これ
     }
   ],
   send: (id, payload) => {
@@ -38,7 +38,6 @@ const CHANNEL_ID = "1480661292879581194";
 client.once("ready", async () => {
   console.log("Bot Ready");
 
-  // Lavalink初期化
   manager.init(client.user!.id);
 
   const guild = client.guilds.cache.first();
