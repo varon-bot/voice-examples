@@ -1,10 +1,10 @@
 const manager = new Manager({
   nodes: [
     {
-      host: "viaduct.proxy.rlwy.net",
-      port: 12345,
+      host: "ballast.proxy.rlwy.net",
+      port: 43055,
       password: "youshallnotpass",
-      secure: false // ← ここをfalseに！！
+      secure: false
     }
   ],
   send: (id, payload) => {
