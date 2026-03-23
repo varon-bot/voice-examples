@@ -12,9 +12,9 @@ const manager = new Manager({
   nodes: [
     {
       host: "lavalink-production-ba77.up.railway.app",
-      port: 443,
+      port: 2333,
       password: "youshallnotpass",
-      secure: true
+      secure: false
     }
   ],
   send: (id, payload) => {
