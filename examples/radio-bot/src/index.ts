@@ -11,7 +11,7 @@ const client = new Client({
 const manager = new Manager({
   nodes: [
     {
-      host: "lavalink.railway.internal", // ← ★ここが重要
+      host: "lavalink", // ← ★ここだけ修正
       port: 2333,
       password: "youshallnotpass",
       secure: false
