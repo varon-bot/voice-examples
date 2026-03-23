@@ -8,13 +8,14 @@ const client = new Client({
   ]
 });
 
+// ★ここにTCP Proxyの情報を入れる
 const manager = new Manager({
   nodes: [
     {
-      host: "lavalink-production-ba77.up.railway.app", // ← ★ここ変更（あなたのURLにする）
-      port: 443, // ← ★これ
+      host: "xxxxx.proxy.rlwy.net", // ← ★あとで置き換える
+      port: 443,
       password: "youshallnotpass",
-      secure: true // ← ★これ
+      secure: true
     }
   ],
   send: (id, payload) => {
@@ -23,13 +24,13 @@ const manager = new Manager({
   }
 });
 
-// Lavalink接続ログ
+// ログ確認（重要）
 manager.on("nodeConnect", () => {
-  console.log("Lavalink接続成功");
+  console.log("✅ Lavalink接続成功");
 });
 
 manager.on("nodeError", (_, err) => {
-  console.log("Lavalink接続失敗", err);
+  console.log("❌ Lavalink接続失敗", err);
 });
 
 // VC ID
@@ -38,6 +39,7 @@ const CHANNEL_ID = "1480661292879581194";
 client.once("ready", async () => {
   console.log("Bot Ready");
 
+  // Lavalink初期化
   manager.init(client.user!.id);
 
   const guild = client.guilds.cache.first();
@@ -71,6 +73,7 @@ client.once("ready", async () => {
   console.log("再生開始");
 });
 
+// DiscordとLavalinkの連携（超重要）
 client.on("raw", (d) => manager.updateVoiceState(d));
 
 client.login(process.env.DISCORD_TOKEN);
