@@ -1,8 +1,8 @@
 const manager = new Manager({
   nodes: [
     {
-      host: "ballast.proxy.rlwy.net",
-      port: 43055,
+      host: "lavalink",
+      port: 2333,
       password: "youshallnotpass",
       secure: false
     }
