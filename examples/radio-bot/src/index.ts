@@ -1,44 +1,12 @@
-import { Client, GatewayIntentBits } from "discord.js";
-import { Manager } from "erela.js";
-
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildVoiceStates
-  ]
-});
-
-const manager = new Manager({
-  nodes: [
-    {
-      host: "lavalink",
-      port: 2333,
-      password: "youshallnotpass",
-      secure: false
-    }
-  ],
-  send: (id, payload) => {
-    const guild = client.guilds.cache.get(id);
-    if (guild) guild.shard.send(payload);
-  }
-});
-
-// ログ
-manager.on("nodeConnect", () => {
-  console.log("✅ Lavalink接続成功");
-});
-
-manager.on("nodeError", (_, err) => {
-  console.log("❌ Lavalink接続失敗", err);
-});
-
-// あなたのVC ID
-const CHANNEL_ID = "1480661292879581194";
-
 client.once("ready", async () => {
   console.log("🤖 Bot Ready");
 
   manager.init(client.user!.id);
+});
+
+// ↓ここ追加
+manager.on("nodeConnect", async () => {
+  console.log("✅ Lavalink接続成功");
 
   const guild = client.guilds.cache.first();
   if (!guild) {
@@ -48,7 +16,7 @@ client.once("ready", async () => {
 
   const player = manager.create({
     guild: guild.id,
-    voiceChannel: CHANNEL_ID,
+    voiceChannel: "1480661292879581194",
     textChannel: guild.systemChannelId ?? undefined,
     selfDeafen: true
   });
@@ -70,8 +38,3 @@ client.once("ready", async () => {
 
   console.log("🎵 再生開始");
 });
-
-// これ重要
-client.on("raw", (d) => manager.updateVoiceState(d));
-
-client.login(process.env.DISCORD_TOKEN);
