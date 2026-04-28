@@ -1,10 +1,34 @@
+import { Client, GatewayIntentBits } from "discord.js";
+import { Manager } from "erela.js";
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildVoiceStates
+  ]
+});
+
+const manager = new Manager({
+  nodes: [
+    {
+      host: "ballast.proxy.rlwy.net",
+      port: 43055,
+      password: "youshallnotpass",
+      secure: false
+    }
+  ],
+  send(id, payload) {
+    const guild = client.guilds.cache.get(id);
+    if (guild) guild.shard.send(payload);
+  }
+});
+
 client.once("ready", async () => {
   console.log("🤖 Bot Ready");
 
   manager.init(client.user!.id);
 });
 
-// ↓ここ追加
 manager.on("nodeConnect", async () => {
   console.log("✅ Lavalink接続成功");
 
@@ -38,3 +62,11 @@ manager.on("nodeConnect", async () => {
 
   console.log("🎵 再生開始");
 });
+
+manager.on("nodeError", (_, err) => {
+  console.log("❌ Lavalink接続失敗", err);
+});
+
+client.on("raw", (d) => manager.updateVoiceState(d));
+
+client.login(process.env.DISCORD_TOKEN);
