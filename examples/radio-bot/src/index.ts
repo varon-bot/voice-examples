@@ -25,8 +25,11 @@ const manager = new Manager({
 
 client.once("ready", async () => {
   console.log("🤖 Bot Ready");
-
   manager.init(client.user!.id);
+});
+
+manager.on("nodeConnect", async () => {
+  console.log("✅ Lavalink接続成功");
 
   const guild = client.guilds.cache.first();
   if (!guild) {
@@ -42,7 +45,7 @@ client.once("ready", async () => {
   });
 
   player.connect();
-  console.log("🔊 VC接続処理開始");
+  console.log("🔊 VC接続開始");
 
   const res = await manager.search("ytsearch:lofi hip hop");
 
@@ -57,14 +60,10 @@ client.once("ready", async () => {
   console.log("🎵 再生開始");
 });
 
-client.on("raw", (d) => manager.updateVoiceState(d));
-
-manager.on("nodeConnect", () => {
-  console.log("✅ Lavalink接続成功");
-});
-
 manager.on("nodeError", (_, err) => {
   console.log("❌ Lavalink接続失敗", err);
 });
+
+client.on("raw", (d) => manager.updateVoiceState(d));
 
 client.login(process.env.DISCORD_TOKEN);
