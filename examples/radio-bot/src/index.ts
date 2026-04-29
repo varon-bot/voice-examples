@@ -47,7 +47,9 @@ manager.on("nodeConnect", async () => {
   player.connect();
   console.log("🔊 VC接続開始");
 
-  const res = await manager.search("ytsearch:lofi hip hop");
+const res = await manager.search(
+  "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+);
 
   if (!res.tracks.length) {
     console.log("❌ 曲取得失敗");
