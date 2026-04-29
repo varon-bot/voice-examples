@@ -6,7 +6,7 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildVoiceStates
   ]
-}); 
+});
 
 const manager = new Manager({
   nodes: [
@@ -17,7 +17,7 @@ const manager = new Manager({
       secure: false
     }
   ],
-  send(id, payload) {
+  send: (id, payload) => {
     const guild = client.guilds.cache.get(id);
     if (guild) guild.shard.send(payload);
   }
@@ -27,10 +27,6 @@ client.once("ready", async () => {
   console.log("🤖 Bot Ready");
 
   manager.init(client.user!.id);
-});
-
-manager.on("nodeConnect", async () => {
-  console.log("✅ Lavalink接続成功");
 
   const guild = client.guilds.cache.first();
   if (!guild) {
@@ -48,7 +44,7 @@ manager.on("nodeConnect", async () => {
   player.connect();
   console.log("🔊 VC接続処理開始");
 
-const res = await manager.search("lofi hip hop");
+  const res = await manager.search("ytsearch:lofi hip hop");
 
   if (!res.tracks.length) {
     console.log("❌ 曲取得失敗");
@@ -61,10 +57,14 @@ const res = await manager.search("lofi hip hop");
   console.log("🎵 再生開始");
 });
 
+client.on("raw", (d) => manager.updateVoiceState(d));
+
+manager.on("nodeConnect", () => {
+  console.log("✅ Lavalink接続成功");
+});
+
 manager.on("nodeError", (_, err) => {
   console.log("❌ Lavalink接続失敗", err);
 });
-
-client.on("raw", (d) => manager.updateVoiceState(d));
 
 client.login(process.env.DISCORD_TOKEN);
