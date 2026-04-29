@@ -11,7 +11,7 @@ const client = new Client({
 const nodes = [
   {
     name: "Lavalink",
-    url: "ballast.proxy.rlwy.net:43055",
+    url: "ws://ballast.proxy.rlwy.net:43055",
     auth: "youshallnotpass",
     secure: false
   }
@@ -31,28 +31,34 @@ client.once("ready", async () => {
     return;
   }
 
-  const player = await shoukaku.joinVoiceChannel({
-    guildId: guild.id,
-    channelId: "1480661292879581194",
-    shardId: 0
-  });
+  try {
+    const player = await shoukaku.joinVoiceChannel({
+      guildId: guild.id,
+      channelId: "1480661292879581194",
+      shardId: 0,
+      deaf: true
+    });
 
-  console.log("🔊 VC接続成功");
+    console.log("🔊 VC接続成功");
 
-  const result = await player.node.rest.resolve(
-    "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-  );
+    const result = await player.node.rest.resolve(
+      "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+    );
 
-  if (!result || !result.tracks.length) {
-    console.log("❌ 曲取得失敗");
-    return;
+    if (!result || !result.tracks || result.tracks.length === 0) {
+      console.log("❌ 曲取得失敗");
+      return;
+    }
+
+    player.playTrack({
+      track: result.tracks[0].encoded
+    });
+
+    console.log("🎵 再生開始");
+
+  } catch (err) {
+    console.log("❌ エラー", err);
   }
-
-  await player.playTrack({
-    track: result.tracks[0].encoded
-  });
-
-  console.log("🎵 再生開始");
 });
 
 client.login(process.env.DISCORD_TOKEN);
