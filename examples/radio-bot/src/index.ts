@@ -26,17 +26,18 @@ client.once("ready", async () => {
   console.log("🤖 Bot Ready");
 
   const guild = client.guilds.cache.first();
-  if (!guild) return;
+  if (!guild) {
+    console.log("❌ Guild取得失敗");
+    return;
+  }
 
-  const connection = await shoukaku.joinVoiceChannel({
+  const player = await shoukaku.joinVoiceChannel({
     guildId: guild.id,
     channelId: "1480661292879581194",
     shardId: 0
   });
 
   console.log("🔊 VC接続成功");
-
-  const player = connection;
 
   const result = await player.node.rest.resolve(
     "https://www.youtube.com/watch?v=jfKfPfyJRdk"
@@ -47,7 +48,9 @@ client.once("ready", async () => {
     return;
   }
 
-  player.playTrack({ track: result.tracks[0].encoded });
+  await player.playTrack({
+    track: result.tracks[0].encoded
+  });
 
   console.log("🎵 再生開始");
 });
