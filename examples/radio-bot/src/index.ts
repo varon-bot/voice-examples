@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import { Manager } from "erela.js";
+import { Shoukaku, Connectors } from "shoukaku";
 
 const client = new Client({
   intents: [
@@ -8,64 +8,48 @@ const client = new Client({
   ]
 });
 
-const manager = new Manager({
-  nodes: [
-    {
-      host: "ballast.proxy.rlwy.net",
-      port: 43055,
-      password: "youshallnotpass",
-      secure: false
-    }
-  ],
-  send: (id, payload) => {
-    const guild = client.guilds.cache.get(id);
-    if (guild) guild.shard.send(payload);
+const nodes = [
+  {
+    name: "Lavalink",
+    url: "ballast.proxy.rlwy.net:43055",
+    auth: "youshallnotpass",
+    secure: false
   }
-});
+];
+
+const shoukaku = new Shoukaku(
+  new Connectors.DiscordJS(client),
+  nodes
+);
 
 client.once("ready", async () => {
   console.log("🤖 Bot Ready");
-  manager.init(client.user!.id);
-});
-
-manager.on("nodeConnect", async () => {
-  console.log("✅ Lavalink接続成功");
 
   const guild = client.guilds.cache.first();
-  if (!guild) {
-    console.log("❌ Guild取得失敗");
-    return;
-  }
+  if (!guild) return;
 
-  const player = manager.create({
-    guild: guild.id,
-    voiceChannel: "1480661292879581194",
-    textChannel: guild.systemChannelId ?? undefined,
-    selfDeafen: true
+  const connection = await shoukaku.joinVoiceChannel({
+    guildId: guild.id,
+    channelId: "1480661292879581194",
+    shardId: 0
   });
 
-  player.connect();
-  console.log("🔊 VC接続開始");
+  console.log("🔊 VC接続成功");
 
-const res = await manager.search(
-  "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-);
+  const player = connection;
 
-  if (!res.tracks.length) {
+  const result = await player.node.rest.resolve(
+    "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+  );
+
+  if (!result || !result.tracks.length) {
     console.log("❌ 曲取得失敗");
     return;
   }
 
-  player.queue.add(res.tracks[0]);
-  player.play();
+  player.playTrack({ track: result.tracks[0].encoded });
 
   console.log("🎵 再生開始");
 });
-
-manager.on("nodeError", (_, err) => {
-  console.log("❌ Lavalink接続失敗", err);
-});
-
-client.on("raw", (d) => manager.updateVoiceState(d));
 
 client.login(process.env.DISCORD_TOKEN);
