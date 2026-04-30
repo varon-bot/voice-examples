@@ -6,12 +6,12 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildVoiceStates
   ]
-}); 
+});
 
 const nodes = [
   {
     name: "Lavalink",
-    url: "ws://ballast.proxy.rlwy.net:43055",
+    url: "ballast.proxy.rlwy.net:43055",
     auth: "youshallnotpass",
     secure: false
   }
@@ -26,39 +26,42 @@ client.once("ready", async () => {
   console.log("🤖 Bot Ready");
 
   const guild = client.guilds.cache.first();
+
   if (!guild) {
     console.log("❌ Guild取得失敗");
     return;
   }
 
-  try {
-    const player = await shoukaku.joinVoiceChannel({
-      guildId: guild.id,
-      channelId: "1480661292879581194",
-      shardId: 0,
-      deaf: true
-    });
+  const channel = guild.channels.cache.get("1480661292879581194");
 
-    console.log("🔊 VC接続成功");
-
-    const result = await player.node.rest.resolve(
-      "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-    );
-
-    if (!result || !result.tracks || result.tracks.length === 0) {
-      console.log("❌ 曲取得失敗");
-      return;
-    }
-
-    player.playTrack({
-      track: result.tracks[0].encoded
-    });
-
-    console.log("🎵 再生開始");
-
-  } catch (err) {
-    console.log("❌ エラー", err);
+  if (!channel || !channel.isVoiceBased()) {
+    console.log("❌ VC取得失敗");
+    return;
   }
+
+  console.log("🔊 VC接続開始");
+
+  const player = await shoukaku.joinVoiceChannel({
+    guildId: guild.id,
+    channelId: channel.id,
+    shardId: 0,
+    deaf: true
+  });
+
+  console.log("✅ VC接続成功");
+
+  const res = await shoukaku.search(
+    "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+  );
+
+  if (!res.data || !res.data.length) {
+    console.log("❌ 曲取得失敗");
+    return;
+  }
+
+  player.playTrack({ track: res.data[0].encoded });
+
+  console.log("🎵 再生開始");
 });
 
 client.login(process.env.DISCORD_TOKEN);
