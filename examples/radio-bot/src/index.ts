@@ -26,20 +26,18 @@ client.once("ready", async () => {
   console.log("🤖 Bot Ready");
 
   const guild = client.guilds.cache.first();
-
   if (!guild) {
     console.log("❌ Guild取得失敗");
     return;
   }
 
-  const channel = guild.channels.cache.get("1480661292879581194");
+  const voiceChannelId = "1480661292879581194"; // ←自分のVCに変更
+  const channel = guild.channels.cache.get(voiceChannelId);
 
   if (!channel || !channel.isVoiceBased()) {
     console.log("❌ VC取得失敗");
     return;
   }
-
-  console.log("🔊 VC接続開始");
 
   const player = await shoukaku.joinVoiceChannel({
     guildId: guild.id,
@@ -48,18 +46,19 @@ client.once("ready", async () => {
     deaf: true
   });
 
-  console.log("✅ VC接続成功");
+  console.log("🔊 VC接続成功");
 
-  const res = await shoukaku.search(
+  const result = await shoukaku.rest.resolve(
     "https://www.youtube.com/watch?v=jfKfPfyJRdk"
   );
 
-  if (!res.data || !res.data.length) {
+  if (!result || !result.tracks.length) {
     console.log("❌ 曲取得失敗");
     return;
   }
 
-  player.playTrack({ track: res.data[0].encoded });
+  const track = result.tracks[0].encoded;
+  await player.playTrack({ track });
 
   console.log("🎵 再生開始");
 });
