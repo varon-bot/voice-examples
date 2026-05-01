@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "discord.js": "^14.15.3",
-    "shoukaku": "^4.1.1"
+    "shoukaku": "3.4.2"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
